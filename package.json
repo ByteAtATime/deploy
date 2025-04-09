@@ -48,7 +48,6 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"@inlang/paraglide-js": "^2.0.0",
 		"better-auth": "^1.2.5",
 		"drizzle-orm": "^0.40.0",
 		"postgres": "^3.4.5"
