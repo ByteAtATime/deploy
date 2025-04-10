@@ -1,0 +1,165 @@
+---
+title: Deploy with Vercel
+description: Learn how to deploy your web applications using Vercel's platform
+difficulty: Beginner
+estimatedTime: 15 minutes
+---
+
+<script lang="ts">
+  import forkButton from "./_assets/fork-button.png";
+  import forkScreen from "./_assets/fork-screen.png";
+  import vercelSettings from "./_assets/vercel-settings.png";
+  import Checkpoint from "$lib/components/Checkpoint.svelte";
+  import { validateGithubReadmeComment, validateOwnerCommit, createVercelDeploymentValidator } from "./validators";
+
+  export let data;
+  
+  // Create a Vercel validator that checks for the user's Slack ID
+  const validateVercelDeployment = createVercelDeploymentValidator(data.slackId || "");
+</script>
+
+<Checkpoint
+  title="Verify Your Repository"
+  inputLabel="Enter the URL of your forked GitHub repository:"
+  placeholder="https://github.com/username/repo"
+  validator={validateGithubReadmeComment}
+>
+
+## Step 1: Fork the Repository
+
+First, make sure that you have a GitHub account. If you don't, [sign up for one](https://github.com/signup) before continuing.
+
+Then, fork the following repository. We will be using it for the rest of this guide.
+
+<a
+  class="mx-auto w-fit block rounded-sm border border-indigo-600 bg-indigo-600 px-8 py-3 text-sm font-medium text-white hover:bg-transparent hover:text-indigo-600 focus:ring-3 focus:outline-hidden"
+  href="https://github.com/ByteAtATime/deploy-vercel"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  Fork me!
+</a>
+
+If you look on the top-right corner of this repository, you should see these three buttons:
+
+<img src={forkButton} alt="The fork button in the top right of a GitHub repository" />
+
+Click on "fork", which should give you this screen. You shouldn't have to change anything, simply continue.
+
+<img src={forkScreen} alt="A screen prompting the user to fork a repository in GitHub" />
+
+
+<div slot="pending">
+  <p>Complete this step to continue to the next part of the tutorial.</p>
+</div>
+<div slot="success">
+  <p>You've verified your fork! Now let's continue with cloning the repository.</p>
+</div>
+</Checkpoint>
+
+<Checkpoint
+  title="Check Your Commits"
+  inputLabel="Enter the URL of your forked GitHub repository with the pushed commits:"
+  placeholder="https://github.com/username/repo"
+  validator={validateOwnerCommit}
+>
+Then, let's clone this repository to your own computer. Run the following command in a terminal:
+
+<!-- TODO: make this copy without the $ -->
+```sh
+$ git clone https://github.com/YOUR_USERNAME/deploy-vercel
+```
+
+## Step 2: Add Your Slack ID
+
+In your favorite editor or IDE, go into `src/routes/+page.svelte`. You should see the following line of code:
+```
+const slackId = "U12345678"; // TODO: Replace with your actual Slack ID!
+```
+
+Replace this with the following:
+
+{#if data.slackId}
+<pre>
+const slackId = "{data.slackId}";
+</pre>
+{:else}
+```
+Something went wrong fetching your Slack ID
+```
+{/if}
+
+Then, in your terminal, run the following commands:
+
+```sh
+$ git add .
+$ git commit -m "added my slack id!"
+$ git push
+```
+
+<!-- todo: add a "what happened here?" section -->
+
+</Checkpoint>
+
+<Checkpoint
+  title="Deploy to Vercel"
+  inputLabel="Enter the URL of your Vercel deployment:"
+  placeholder="https://your-project.vercel.app"
+  validator={validateVercelDeployment}
+>
+
+## Step 3: Deploy to Vercel
+
+Now let's deploy the site to Vercel so it can be accessed online. 
+
+1. First, make sure you have a [Vercel account](https://vercel.com/signup). You can sign up with your GitHub account for a seamless integration.
+
+2. Go to [vercel.com/new](https://vercel.com/new) to create a new project.
+
+3. Import your GitHub repository:
+   - Select "Continue with GitHub" and authorize Vercel if prompted
+   - Find and select your `deploy-vercel` repository
+
+4. Configure your project:
+   - Vercel will automatically detect the project settings
+   - Framework preset: Select "SvelteKit" if not automatically detected
+   - Root directory: Leave as is (should be `/`)
+   - Build command: Leave default (`npm run build`)
+   - Output directory: Leave default (`build`)
+
+<img src={vercelSettings} alt="A screenshot of Vercel with the default settings applied (which are the correct ones)" />
+
+5. Click "Deploy" and wait for the deployment to complete
+
+Once deployed, Vercel will provide you with a URL to access your site (typically in the format `https://your-project.vercel.app`). 
+
+When you visit your deployed site, make sure it displays:
+
+{#if data.slackId}
+<pre>
+Created by {data.slackId}
+</pre>
+{:else}
+```
+Created by YOUR_SLACK_ID
+```
+{/if}
+
+If you don't see this text, make sure you've correctly updated the `slackId` in your `src/routes/+page.svelte` file as instructed in Step 2.
+
+Copy the deployment URL and paste it in the field below to verify your deployment.
+
+<div slot="pending">
+  <p>Complete your Vercel deployment and enter the URL to continue.</p>
+</div>
+<div slot="success">
+  <p>Congratulations! Your app is now live on Vercel. You've successfully:</p>
+  <ul>
+    <li>Forked a GitHub repository</li>
+    <li>Made code changes and pushed commits</li>
+    <li>Deployed a live web application using Vercel</li>
+  </ul>
+  <p>Your deployment correctly shows your Slack ID, confirming that your code changes were properly deployed.</p>
+  <p>You can continue to make changes to your repository, and Vercel will automatically redeploy your site when you push new commits.</p>
+</div>
+</Checkpoint>

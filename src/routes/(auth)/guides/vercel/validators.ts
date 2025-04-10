@@ -1,0 +1,162 @@
+export async function validateGithubReadmeComment(repoUrl: string): Promise<{ success: boolean; message: string }> {
+    try {
+        const urlPattern = /github\.com\/([^\/]+)\/([^\/]+)/;
+        const match = repoUrl.match(urlPattern);
+
+        if (!match) {
+            return {
+                success: false,
+                message: 'Invalid GitHub repository URL'
+            };
+        }
+
+        const [, username, repo] = match;
+
+        const readmeUrl = `https://raw.githubusercontent.com/${username}/${repo}/main/README.md`;
+        const response = await fetch(readmeUrl);
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message: 'Could not fetch README.md. Make sure the repository exists and is public.'
+            };
+        }
+
+        const readmeContent = await response.text();
+        const expectedComment = 'Orpheus X Heidi';
+
+        if (readmeContent.includes(expectedComment)) {
+            return {
+                success: true,
+                message: 'Great job! Your repository has correctly been forked.'
+            };
+        } else {
+            return {
+                success: false,
+                message: `Something is wrong with your fork. Make sure you've forked the correct repository and have not made any changes.`
+            };
+        }
+    } catch (error) {
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'An unknown error occurred'
+        };
+    }
+}
+
+export async function validateOwnerCommit(repoUrl: string): Promise<{ success: boolean; message: string }> {
+    try {
+        const urlPattern = /github\.com\/([^\/]+)\/([^\/]+)/;
+        const match = repoUrl.match(urlPattern);
+
+        if (!match) {
+            return {
+                success: false,
+                message: 'Invalid GitHub repository URL'
+            };
+        }
+
+        const [, username, repo] = match;
+
+        const commitsUrl = `https://api.github.com/repos/${username}/${repo}/commits?author=${username}`;
+        const response = await fetch(commitsUrl);
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message: 'Could not fetch commits. Make sure the repository exists and is public.'
+            };
+        }
+
+        const commits = await response.json();
+
+        if (Array.isArray(commits) && commits.length > 0) {
+            return {
+                success: true,
+                message: `Great job! We found your commits.`
+            };
+        } else {
+            return {
+                success: false,
+                message: 'No commits found! Make sure you have made at least one commit to the repository.'
+            };
+        }
+    } catch (error) {
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'An unknown error occurred'
+        };
+    }
+}
+
+export function createVercelDeploymentValidator(slackId: string) {
+    return async function validateVercelDeployment(deployUrl: string): Promise<{ success: boolean; message: string }> {
+        try {
+            if (!deployUrl.includes('vercel.app')) {
+                return {
+                    success: false,
+                    message: 'Please provide a valid Vercel deployment URL (should include vercel.app)'
+                };
+            }
+
+            const response = await fetch(deployUrl);
+
+            if (!response.ok) {
+                return {
+                    success: false,
+                    message: 'Your Vercel deployment does not appear to be live. Make sure the URL is correct and the site has been deployed.'
+                };
+            }
+
+            const content = await response.text();
+            const expectedText = `Created by ${slackId}`;
+
+            if (!content.includes(expectedText)) {
+                return {
+                    success: false,
+                    message: `Your deployment is missing the required text: "${expectedText}". Make sure your App.tsx file has the correct SlackID.`
+                };
+            }
+
+            return {
+                success: true,
+                message: 'Great job! Your Vercel deployment is live and contains your Slack ID.'
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error instanceof Error ? error.message : 'An unknown error occurred accessing your deployment'
+            };
+        }
+    };
+}
+
+export async function validateVercelDeployment(deployUrl: string): Promise<{ success: boolean; message: string }> {
+    try {
+        if (!deployUrl.includes('vercel.app')) {
+            return {
+                success: false,
+                message: 'Please provide a valid Vercel deployment URL (should include vercel.app)'
+            };
+        }
+
+        const response = await fetch(deployUrl);
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message: 'Your Vercel deployment does not appear to be live. Make sure the URL is correct and the site has been deployed.'
+            };
+        }
+
+        return {
+            success: true,
+            message: 'Great job! Your Vercel deployment is live and working correctly.'
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: error instanceof Error ? error.message : 'An unknown error occurred accessing your deployment'
+        };
+    }
+} 
