@@ -5,23 +5,24 @@ import { authClient } from '$lib/auth';
 import { auth } from '$lib/server/auth';
 
 export const load: LayoutServerLoad = async ({ request }) => {
-    const { session } = await auth.api.getSession({
-        headers: request.headers
-    }) ?? {};
+	const { session } =
+		(await auth.api.getSession({
+			headers: request.headers
+		})) ?? {};
 
-    if (!session) {
-        throw redirect(303, '/login');
-    }
+	if (!session) {
+		throw redirect(303, '/login');
+	}
 
-    const accounts = await auth.api.listUserAccounts({
-        headers: request.headers
-    });
+	const accounts = await auth.api.listUserAccounts({
+		headers: request.headers
+	});
 
-    const slackAccount = accounts.find((account) => account.provider === 'slack');
+	const slackAccount = accounts.find((account) => account.provider === 'slack');
 
-    if (!slackAccount) {
-        return { slackId: null };
-    }
+	if (!slackAccount) {
+		return { slackId: null };
+	}
 
-    return { slackId: slackAccount.accountId };
+	return { slackId: slackAccount.accountId };
 };

@@ -4,12 +4,9 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	plugins: [
-		tailwindcss(),
-		sveltekit()
-	],
+	plugins: [tailwindcss(), sveltekit()],
 	esbuild: {
-		target: 'es2022',
+		target: 'es2022'
 	},
 	test: {
 		workspace: [
@@ -37,7 +34,6 @@ export default defineConfig({
 		]
 	},
 	server: {
-		allowedHosts: ['46f2-103-40-79-148.ngrok-free.app'],
-
+		allowedHosts: ['46f2-103-40-79-148.ngrok-free.app']
 	}
 });
