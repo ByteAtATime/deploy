@@ -8,6 +8,9 @@ export default defineConfig({
 		tailwindcss(),
 		sveltekit()
 	],
+	esbuild: {
+		target: 'es2022',
+	},
 	test: {
 		workspace: [
 			{

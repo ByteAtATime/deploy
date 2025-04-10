@@ -48,8 +48,10 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
+		"@needle-di/core": "^0.12.0",
 		"better-auth": "^1.2.5",
 		"drizzle-orm": "^0.40.0",
+		"hono": "^4.7.6",
 		"postgres": "^3.4.5"
 	},
 	"pnpm": {

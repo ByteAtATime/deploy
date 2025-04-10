@@ -8,12 +8,18 @@ importers:
 
   .:
     dependencies:
+      '@needle-di/core':
+        specifier: ^0.12.0
+        version: 0.12.0
       better-auth:
         specifier: ^1.2.5
         version: 1.2.5(typescript@5.8.3)
       drizzle-orm:
         specifier: ^0.40.0
         version: 0.40.1(gel@2.0.2)(kysely@0.27.6)(postgres@3.4.5)
+      hono:
+        specifier: ^4.7.6
+        version: 4.7.6
       postgres:
         specifier: ^3.4.5
         version: 3.4.5
@@ -843,6 +849,9 @@ packages:
     resolution: {integrity: sha512-llMXd39jtP0HpQLVI37Bf1m2ADlEb35GYSh1SDSLsBhR+5iCxiNGlT31yqbNtVHygHAtMy6dWFERpU2JgufhPg==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@needle-di/core@0.12.0':
+    resolution: {integrity: sha512-gvwFXwXykdwsxrbJDjirLELZSPbnCp+MdbQW1YrdYc4dZKCQabuJm6WXCB+FIYQtYRe5nj6tIvmE4WIbe3Q9mg==}
 
   '@noble/ciphers@0.6.0':
     resolution: {integrity: sha512-mIbq/R9QXk5/cTfESb1OKtyFnk7oc1Om/8onA1158K9/OZUQFDEVy55jVTato+xmp3XX6F6Qh0zz0Nc1AxAlRQ==}
@@ -1829,6 +1838,10 @@ packages:
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
+
+  hono@4.7.6:
+    resolution: {integrity: sha512-564rVzELU+9BRqqx5k8sT2NFwGD3I3Vifdb6P7CmM6FiarOSY+fDC+6B+k9wcCb86ReoayteZP2ki0cRLN1jbw==}
+    engines: {node: '>=16.9.0'}
 
   html-encoding-sniffer@4.0.0:
     resolution: {integrity: sha512-Y22oTqIU4uuPgEemfz7NDJz6OeKf12Lsu+QC+s3BVpda64lTiMYCyGwg5ki4vFxkMwQdeZDl2adZoqUgdFuTgQ==}
@@ -3220,6 +3233,8 @@ snapshots:
       - encoding
       - supports-color
 
+  '@needle-di/core@0.12.0': {}
+
   '@noble/ciphers@0.6.0': {}
 
   '@noble/hashes@1.7.1': {}
@@ -4259,6 +4274,8 @@ snapshots:
   hasown@2.0.2:
     dependencies:
       function-bind: 1.1.2
+
+  hono@4.7.6: {}
 
   html-encoding-sniffer@4.0.0:
     dependencies:
