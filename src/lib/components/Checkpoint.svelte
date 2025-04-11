@@ -2,6 +2,18 @@
 	import type { Snippet } from 'svelte';
 	import { getCheckpointContext } from './checkpoint.svelte.js';
 
+	type ValidationResult = {
+		success: boolean;
+		message: string;
+	};
+
+	type GuideStep = {
+		guideId: string;
+		step: string;
+		url?: string;
+		slackId?: string;
+	};
+
 	type Props = {
 		title: string;
 		inputLabel: string;
@@ -10,15 +22,22 @@
 		children: Snippet;
 		pending: Snippet;
 		success: Snippet;
-		validator: (input: string) => Promise<{ success: boolean; message: string }>;
+		guideId: string;
+		step: string;
+		slackId?: string;
+		validator?: (input: string) => Promise<ValidationResult>;
 		onSuccess: () => void;
 		onFailure: () => void;
 	};
+	
 	const {
 		title,
 		inputLabel,
 		placeholder,
 		successMessage,
+		guideId,
+		step,
+		slackId,
 		validator,
 		onSuccess,
 		onFailure,
@@ -36,6 +55,39 @@
 
 	let index = ctx.stepCounter++;
 
+	async function validateGuideStep(
+		guideId: string,
+		step: string,
+		url: string,
+		slackId?: string
+	): Promise<ValidationResult> {
+		try {
+			const payload: Record<string, any> = { url };
+			if (slackId) {
+				payload.slackId = slackId;
+			}
+
+			const response = await fetch(`/api/guides/${guideId}/validate/${step}`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(payload)
+			});
+
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+
+			return await response.json();
+		} catch (error) {
+			return {
+				success: false,
+				message: error instanceof Error ? error.message : 'An unknown error occurred'
+			};
+		}
+	}
+
 	async function verify() {
 		if (!inputValue.trim()) {
 			resultMessage = 'Please enter a value';
@@ -48,7 +100,15 @@
 		resultMessage = '';
 
 		try {
-			const result = await validator(inputValue);
+			let result: ValidationResult;
+			
+			if (validator) {
+				// Use the custom validator if provided
+				result = await validator(inputValue);
+			} else {
+				// Otherwise use the built-in API call
+				result = await validateGuideStep(guideId, step, inputValue, slackId);
+			}
 
 			if (result.success) {
 				verificationResult = 'success';
@@ -64,7 +124,7 @@
 		} catch (error) {
 			verificationResult = 'error';
 			resultMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-			onFailure();
+			onFailure?.();
 		} finally {
 			isVerifying = false;
 		}

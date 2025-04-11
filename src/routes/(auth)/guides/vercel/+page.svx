@@ -10,19 +10,16 @@ estimatedTime: 15 minutes
   import forkScreen from "./_assets/fork-screen.png";
   import vercelSettings from "./_assets/vercel-settings.png";
   import Checkpoint from "$lib/components/Checkpoint.svelte";
-  import { validateGithubReadmeComment, validateOwnerCommit, createVercelDeploymentValidator } from "./validators";
 
   export let data;
-  
-  // Create a Vercel validator that checks for the user's Slack ID
-  const validateVercelDeployment = createVercelDeploymentValidator(data.slackId || "");
 </script>
 
 <Checkpoint
   title="Verify Your Repository"
   inputLabel="Enter the URL of your forked GitHub repository:"
   placeholder="https://github.com/username/repo"
-  validator={validateGithubReadmeComment}
+  guideId="vercel"
+  step="repository-fork"
 >
 
 ## Step 1: Fork the Repository
@@ -61,7 +58,8 @@ Click on "fork", which should give you this screen. You shouldn't have to change
   title="Check Your Commits"
   inputLabel="Enter the URL of your forked GitHub repository with the pushed commits:"
   placeholder="https://github.com/username/repo"
-  validator={validateOwnerCommit}
+  guideId="vercel"
+  step="commit-check"
 >
 Then, let's clone this repository to your own computer. Run the following command in a terminal:
 
@@ -105,7 +103,9 @@ $ git push
   title="Deploy to Vercel"
   inputLabel="Enter the URL of your Vercel deployment:"
   placeholder="https://your-project.vercel.app"
-  validator={validateVercelDeployment}
+  guideId="vercel"
+  step="deployment"
+  slackId={data.slackId || ""}
 >
 
 ## Step 3: Deploy to Vercel
