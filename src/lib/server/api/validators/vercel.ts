@@ -148,7 +148,7 @@ export class VercelGuideValidator extends BaseGuideValidator {
 				if (!content.includes(expectedText)) {
 					return {
 						success: false,
-						message: `Your deployment is missing the required text: "${expectedText}". Make sure your App.tsx file has the correct SlackID.`
+						message: `Your deployment is missing the required text: "${expectedText}". Make sure your +page.svelte file has the correct SlackID.`
 					};
 				}
 			}
