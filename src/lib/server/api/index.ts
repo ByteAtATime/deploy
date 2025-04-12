@@ -2,12 +2,16 @@ import { Container, inject, injectable } from '@needle-di/core';
 import { Hono } from 'hono';
 import { auth } from '../auth';
 import { VALIDATORS } from './validators';
+import { CHECKPOINT_SERVICE, CheckpointService } from './checkpoints';
 
 @injectable()
 export class Api {
 	private app: Hono;
 
-	constructor(private validators = inject(VALIDATORS)) {
+	constructor(
+		private validators = inject(VALIDATORS),
+		private checkpointService = inject(CHECKPOINT_SERVICE)
+	) {
 		this.app = new Hono();
 	}
 
@@ -31,9 +35,69 @@ export class Api {
 						return c.json({ success: false, message: 'Invalid validation step' }, 400);
 					}
 
-					return c.json(await validator.validate(step, body));
+					const result = await validator.validate(step, body);
+
+					const session = await auth.api.getSession({
+						headers: c.req.raw.headers
+					});
+
+					const userId = session?.user?.id;
+
+					if (!userId) {
+						return c.json({ success: false, message: 'Unauthorized' }, 401);
+					}
+
+					await this.checkpointService.recordAttempt(
+						{ guideId, step },
+						{
+							userId,
+							success: result.success,
+							metadata: body.slackId ? { slackId: body.slackId } : undefined,
+							inputValue: body.url,
+							message: result.message
+						}
+					);
+
+					return c.json(result);
 				} catch (error) {
 					return c.json({ success: false, message: 'Invalid request' }, 400);
+				}
+			})
+			.get('/api/checkpoints', async (c) => {
+				try {
+					const session = await auth.api.getSession({
+						headers: c.req.raw.headers
+					});
+					const userId = session?.user?.id;
+
+					if (!userId) {
+						return c.json({ success: false, message: 'Unauthorized' }, 401);
+					}
+
+					const attempts = await this.checkpointService.getAttemptsByUser(userId);
+					return c.json({ attempts });
+				} catch (error) {
+					return c.json({ success: false, message: 'Error retrieving checkpoints' }, 500);
+				}
+			})
+			.get('/api/guides/:guideId/result/:step', async (c) => {
+				try {
+					const guideId = c.req.param('guideId');
+					const step = c.req.param('step');
+
+					const session = await auth.api.getSession({
+						headers: c.req.raw.headers
+					});
+					const userId = session?.user?.id;
+
+					if (!userId) {
+						return c.json({ success: false, message: 'Unauthorized' }, 401);
+					}
+
+					const message = await this.checkpointService.getResultMessage(guideId, step, userId);
+					return c.json({ success: true, message });
+				} catch (error) {
+					return c.json({ success: false, message: 'Error retrieving result message' }, 500);
 				}
 			});
 	}

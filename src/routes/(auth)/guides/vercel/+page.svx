@@ -39,11 +39,11 @@ Then, fork the following repository. We will be using it for the rest of this gu
 
 If you look on the top-right corner of this repository, you should see these three buttons:
 
-<img src={forkButton} alt="The fork button in the top right of a GitHub repository" />
+<img src={forkButton} alt="The fork button in the top right of a GitHub repository" width={852} height={340} />
 
 Click on "fork", which should give you this screen. You shouldn't have to change anything, simply continue.
 
-<img src={forkScreen} alt="A screen prompting the user to fork a repository in GitHub" />
+<img src={forkScreen} alt="A screen prompting the user to fork a repository in GitHub" width={1110} height={823} />
 
 
 <div slot="pending">

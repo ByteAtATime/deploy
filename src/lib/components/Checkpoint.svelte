@@ -1,6 +1,14 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { getCheckpointContext } from './checkpoint.svelte.js';
+	import { 
+		getCheckpointContext, 
+		markStepCompleted, 
+		isStepCompleted,
+		saveInputValue,
+		getInputValue,
+		saveResultMessage,
+		getResultMessage
+	} from './checkpoint.svelte.js';
 
 	type ValidationResult = {
 		success: boolean;
@@ -55,6 +63,23 @@
 
 	let index = ctx.stepCounter++;
 
+	const savedInput = getInputValue(guideId, step);
+	if (savedInput) {
+		inputValue = savedInput;
+	}
+
+	if (isStepCompleted(guideId, step)) {
+		verificationResult = 'success';
+		const savedMessage = getResultMessage(guideId, step);
+		resultMessage = savedMessage || 'Previously verified';
+	}
+
+	$effect(() => {
+		if (inputValue) {
+			saveInputValue(guideId, step, inputValue);
+		}
+	});
+
 	async function validateGuideStep(
 		guideId: string,
 		step: string,
@@ -103,10 +128,8 @@
 			let result: ValidationResult;
 			
 			if (validator) {
-				// Use the custom validator if provided
 				result = await validator(inputValue);
 			} else {
-				// Otherwise use the built-in API call
 				result = await validateGuideStep(guideId, step, inputValue, slackId);
 			}
 
@@ -114,6 +137,9 @@
 				verificationResult = 'success';
 				resultMessage = result.message;
 				ctx.currentStep++;
+				markStepCompleted(guideId, step);
+				saveInputValue(guideId, step, inputValue);
+				saveResultMessage(guideId, step, result.message);
 				console.log(ctx.currentStep);
 				onSuccess?.();
 			} else {
