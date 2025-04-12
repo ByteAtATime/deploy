@@ -11,17 +11,22 @@
 			console.error('Failed to sign in with Slack:', error);
 		}
 	};
+
+	const { data } = $props();
+	const { user } = $derived(data);
 </script>
 
 <h1>Welcome to SvelteKit</h1>
 <p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
 
-<div class="auth-container">
-	<button class="slack-button" on:click={handleSlackSignIn}>
-		<img src="https://cdn.svelte.dev/slack.svg" alt="Slack logo" width="20" height="20" />
-		Sign in with Slack
-	</button>
-</div>
+{#if !user}
+	<div class="auth-container">
+		<button class="slack-button" on:click={handleSlackSignIn}>
+			<img src="https://cdn.svelte.dev/slack.svg" alt="Slack logo" width="20" height="20" />
+			Sign in with Slack
+		</button>
+	</div>
+{/if}
 
 <style>
 	.auth-container {
