@@ -21,3 +21,12 @@ export const checkpointAttempt = pgTable('checkpoint_attempt', {
 	metadata: jsonb('metadata'),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
+
+export const badge = pgTable('badge', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id, { onDelete: 'cascade' }),
+	guideId: text('guide_id').notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});

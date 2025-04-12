@@ -1,6 +1,6 @@
 import { injectable, inject } from '@needle-di/core';
 import { db } from '../../db';
-import { checkpoint, checkpointAttempt } from '../../db/schema';
+import { checkpoint, checkpointAttempt, badge } from '../../db/schema';
 import { eq, and } from 'drizzle-orm';
 
 function generateId() {
@@ -119,5 +119,69 @@ export class CheckpointService {
 			}
 		}
 		return null;
+	}
+
+	async isGuideCompleted(guideId: string, userId: string): Promise<boolean> {
+		const attempts = await db
+			.select()
+			.from(checkpointAttempt)
+			.innerJoin(checkpoint, eq(checkpointAttempt.checkpointId, checkpoint.id))
+			.where(
+				and(
+					eq(checkpointAttempt.userId, userId),
+					eq(checkpoint.guideId, guideId),
+					eq(checkpointAttempt.success, true)
+				)
+			);
+
+		if (attempts.length === 0) return false;
+
+		const stepsCompleted = new Set<string>();
+
+		for (const attempt of attempts) {
+			stepsCompleted.add(attempt.checkpoint.step);
+		}
+
+		const allSteps = await db.select().from(checkpoint).where(eq(checkpoint.guideId, guideId));
+
+		const totalUniqueSteps = new Set(allSteps.map((step) => step.step)).size;
+
+		return stepsCompleted.size === totalUniqueSteps;
+	}
+
+	async awardBadge(guideId: string, userId: string): Promise<boolean> {
+		const existingBadge = await db
+			.select()
+			.from(badge)
+			.where(and(eq(badge.userId, userId), eq(badge.guideId, guideId)))
+			.limit(1);
+
+		if (existingBadge.length > 0) {
+			return false;
+		}
+
+		const newBadge = {
+			id: generateId(),
+			userId,
+			guideId,
+			createdAt: new Date()
+		};
+
+		await db.insert(badge).values(newBadge);
+		return true;
+	}
+
+	async checkAndAwardBadge(guideId: string, userId: string): Promise<boolean> {
+		const isCompleted = await this.isGuideCompleted(guideId, userId);
+
+		if (isCompleted) {
+			return this.awardBadge(guideId, userId);
+		}
+
+		return false;
+	}
+
+	async getUserBadges(userId: string) {
+		return db.select().from(badge).where(eq(badge.userId, userId));
 	}
 }

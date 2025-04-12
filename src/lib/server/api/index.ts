@@ -58,6 +58,10 @@ export class Api {
 						}
 					);
 
+					if (result.success) {
+						await this.checkpointService.checkAndAwardBadge(guideId, userId);
+					}
+
 					return c.json(result);
 				} catch (error) {
 					return c.json({ success: false, message: 'Invalid request' }, 400);
@@ -98,6 +102,23 @@ export class Api {
 					return c.json({ success: true, message });
 				} catch (error) {
 					return c.json({ success: false, message: 'Error retrieving result message' }, 500);
+				}
+			})
+			.get('/api/badges', async (c) => {
+				try {
+					const session = await auth.api.getSession({
+						headers: c.req.raw.headers
+					});
+					const userId = session?.user?.id;
+
+					if (!userId) {
+						return c.json({ success: false, message: 'Unauthorized' }, 401);
+					}
+
+					const userBadges = await this.checkpointService.getUserBadges(userId);
+					return c.json({ success: true, badges: userBadges });
+				} catch (error) {
+					return c.json({ success: false, message: 'Error retrieving badges' }, 500);
 				}
 			});
 	}
